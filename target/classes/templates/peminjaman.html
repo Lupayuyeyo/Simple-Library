@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Peminjaman dan Pengembalian</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 32px; color: #222; }
+        nav { margin-bottom: 24px; }
+        nav a { margin-right: 14px; }
+        h1, h2 { color: #243b53; }
+        table { border-collapse: collapse; width: 100%; margin: 14px 0 28px; }
+        th, td { border: 1px solid #ccc; padding: 9px; text-align: left; }
+        th { background: #eef2f6; }
+        input, select, button { padding: 8px; margin-top: 5px; }
+        .pesan { color: #176b35; }
+        .error { color: #b42318; }
+        .form-row { margin: 12px 0; }
+    </style>
+</head>
+<body>
+<nav>
+    <a th:href="@{/buku}">Buku</a>
+    <a th:href="@{/anggota}">Anggota</a>
+    <a th:href="@{/peminjaman}">Peminjaman</a>
+</nav>
+
+<h1>Peminjaman dan Pengembalian Buku</h1>
+<p class="pesan" th:if="${pesan}" th:text="${pesan}"></p>
+<p class="error" th:if="${error}" th:text="${error}"></p>
+
+<h2>Tambah Peminjaman</h2>
+<div th:if="${#lists.isEmpty(daftarAnggota) or #lists.isEmpty(daftarBuku)}">
+    <p>Tambahkan data anggota dan buku terlebih dahulu sebelum melakukan peminjaman.</p>
+</div>
+<form th:unless="${#lists.isEmpty(daftarAnggota) or #lists.isEmpty(daftarBuku)}"
+      th:action="@{/peminjaman}" method="post">
+    <div class="form-row">
+        <label for="anggota">Pilih Anggota:</label><br>
+        <select id="anggota" name="idAnggota" required>
+            <option value="">-- Pilih anggota --</option>
+            <option th:each="a : ${daftarAnggota}"
+                    th:value="${a.idAnggota}"
+                    th:text="|${a.idAnggota} - ${a.nama}|"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="buku">Pilih Buku:</label><br>
+        <select id="buku" name="idBuku" required>
+            <option value="">-- Pilih buku --</option>
+            <option th:each="b : ${daftarBuku}" th:if="${b.stok > 0}"
+                    th:value="${b.idBuku}"
+                    th:text="|${b.idBuku} - ${b.judul} (stok: ${b.stok})|"></option>
+        </select>
+    </div>
+    <button type="submit">Catat Peminjaman</button>
+</form>
+
+<h2>Daftar Seluruh Transaksi</h2>
+<table>
+    <thead>
+    <tr>
+        <th>ID Transaksi</th><th>Anggota</th><th>Buku</th>
+        <th>Tanggal Pinjam</th><th>Tanggal Kembali</th><th>Status</th><th>Aksi</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="p : ${daftarPeminjaman}">
+        <td th:text="${p.idPeminjaman}">1</td>
+        <td th:text="|${p.anggota.nama} (${p.anggota.idAnggota})|">Nama anggota</td>
+        <td th:text="|${p.buku.judul} (${p.buku.idBuku})|">Judul buku</td>
+        <td th:text="${p.tanggalPinjam}">2026-01-01</td>
+        <td th:text="${p.tanggalKembali != null ? p.tanggalKembali : '-'}">-</td>
+        <td th:text="${p.status}">DIPINJAM</td>
+        <td>
+            <form th:if="${p.status == 'DIPINJAM'}" th:action="@{/peminjaman/kembalikan}" method="post">
+                <input type="hidden" name="idPeminjaman" th:value="${p.idPeminjaman}">
+                <button type="submit">Kembalikan</button>
+            </form>
+            <span th:if="${p.status == 'DIKEMBALIKAN'}">Selesai</span>
+        </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(daftarPeminjaman)}">
+        <td colspan="7">Belum ada transaksi peminjaman.</td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Stok Buku Saat Ini</h2>
+<table>
+    <thead><tr><th>ID Buku</th><th>Judul</th><th>Stok Tersedia</th></tr></thead>
+    <tbody>
+    <tr th:each="b : ${daftarBuku}">
+        <td th:text="${b.idBuku}">B001</td>
+        <td th:text="${b.judul}">Judul buku</td>
+        <td th:text="${b.stok}">0</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

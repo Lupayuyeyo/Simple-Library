@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Daftar Anggota</title>
+</head>
+<body>
+<nav>
+    <a th:href="@{/buku}">Buku</a> |
+    <a th:href="@{/anggota}">Anggota</a> |
+    <a th:href="@{/peminjaman}">Peminjaman</a>
+</nav>
+
+<h1>Daftar Anggota</h1>
+<p th:if="${error}" th:text="${error}" style="color: red;"></p>
+
+<table border="1" cellpadding="8">
+    <thead>
+    <tr><th>ID Anggota</th><th>Nama</th><th>Email</th></tr>
+    </thead>
+    <tbody>
+    <tr th:each="a : ${daftarAnggota}">
+        <td th:text="${a.idAnggota}">A001</td>
+        <td th:text="${a.nama}">Nama anggota</td>
+        <td th:text="${a.email}">email@example.com</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(daftarAnggota)}">
+        <td colspan="3">Belum ada anggota.</td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Tambah Anggota</h2>
+<form th:action="@{/anggota}" method="post">
+    <p><label>ID Anggota: <input name="idAnggota" maxlength="15" required></label></p>
+    <p><label>Nama: <input name="nama" maxlength="100" required></label></p>
+    <p><label>Email: <input name="email" type="email" maxlength="150" required></label></p>
+    <button type="submit">Simpan Anggota</button>
+</form>
+</body>
+</html>
